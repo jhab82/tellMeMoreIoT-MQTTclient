@@ -1,0 +1,4 @@
+/node_modules/*
+/manager/node_mondules/*
+package-lock.json
+rsa_private.pem
