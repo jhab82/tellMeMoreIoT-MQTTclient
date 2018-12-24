@@ -25,6 +25,9 @@ const Sensor = require('sds011-client');
 
 const sensor = new Sensor("/dev/ttyUSB0"); // Use your system path of SDS011 sensor.
 
+const rpiDhtSensor = require('rpi-dht-sensor');
+var dht = new rpiDhtSensor.DHT22(4);
+
 
 // [END iot_mqtt_include]
 
@@ -43,10 +46,10 @@ var backoffTime = 60;
 // Whether an asynchronous publish chain is in progress.
 var publishChainInProgress = false;
 
-var argv = { projectId: "siemens-internet-of-things", 
-		 cloudRegion: "us-central1", 
-	     registryId: "tmmiot-registry",
-	     deviceId: "tmmiot-device-1",
+var argv = { projectId: "tell-me-more-iot", 
+	     cloudRegion: "europe-west1", 
+	     registryId: "tmmiot-registry-1",
+	     deviceId: "tmmiot-device-3",
 	     privateKeyFile: "rsa_private.pem",
 	     tokenExpMins: 20,
 	     numMessages: 10, 
@@ -111,10 +114,12 @@ function publishAsync(messagesSent, numMessages) {
    /* const payload = `${argv.registryId}/${
       argv.deviceId
     }-payload-${messagesSent}`;*/
+    var readout = dht.read();
     var date = new Date();
+   
     sensor.query().then(function(data) {
                // console.log(`Received: ` + JSON.stringify(data));
-		const payload_JSON = { "id": argv.deviceId, "time": date.getTime(), "date": date, "pm2p5": data.pm2p5, "pm10":data.pm10};
+		const payload_JSON = { "id": argv.deviceId, "time": date.getTime(), "date": date, "pm2p5": data.pm2p5, "pm10":data.pm10, "Temp": readout.temperature.toFixed(2), "Hum": readout.humidity.toFixed(2)};
 		const payload = JSON.stringify(payload_JSON);
 		
     // Publish "payload" to the MQTT topic. qos=1 means at least once delivery.
